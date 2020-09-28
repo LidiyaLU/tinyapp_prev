@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/LidiyaLU/tinyapp/issues"
   },
-  "homepage": "https://github.com/LidiyaLU/tinyapp#readme"
+  "homepage": "https://github.com/LidiyaLU/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
