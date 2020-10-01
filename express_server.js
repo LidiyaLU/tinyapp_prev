@@ -27,8 +27,7 @@ app.get("/urls.json", (req, res) => {
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase,
                          username: req.cookies["username"] };/// ADD USERNAME
-                         console.log(req.body);  
-                         console.log(req.params);  
+                         
   res.render("urls_index", templateVars);
   
 });
@@ -85,9 +84,19 @@ app.post("/login", (req,res) => {
 
 //------------LOGOUT------------------
 
-app.post("/logout", (req, res) =>{
+app.post("/logout", (req, res) => {
   res.clearCookie('username');
   res.redirect('urls');
+})
+
+
+//----------REGISTER---------------
+
+app.get('/register', (req,res) => {
+  const templateVars = {username: req.cookies["username"] };
+  console.log("make sure");
+  res.render('urls_register', templateVars);
+  //console.log("make sure");
 })
 
 app.listen(PORT, () => {
