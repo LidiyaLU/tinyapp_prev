@@ -1,5 +1,6 @@
 const express = require("express");
 const cookiesParser = require("cookie-parser");
+const cookieSession = require("cookie-session");
 
 const app = express();
 
@@ -28,10 +29,6 @@ let users = {
     password: "dishwasher-funk"
   }
 };
-
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
@@ -112,10 +109,8 @@ app.post("/logout", (req, res) => {
 
 app.get('/register', (req,res) => {
   const templateVars = {user: users[req.cookies["user_id"]]};
-  console.log(users);
+  //console.log(users);
   res.render('urls_register', templateVars);
-
-  //console.log("make sure");
 })
 
 
@@ -123,16 +118,31 @@ app.post('/register', (req,res) => {
   const id = Math.random().toString(36).substr(2,6);
   const email = req.body['email'];
   const password = req.body['password'];
+  
+  if (!email) {
+    res.sendStatus(404)
+  } 
+  if (!password) {
+    res.sendStatus(404);
+  }
+
+  for (let user in users) {
+    if (req.body['email'] === users[user]['email']){
+      res.sendStatus(404);
+    } 
+  }
+
   users[id] = {id: id,
                 email: email,
                 password: password};
 
   res.cookie("user_id", id);
+  
   res.redirect('/urls');
-  console.log("our new user" , users);
-});
 
+  })
 
+  
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
