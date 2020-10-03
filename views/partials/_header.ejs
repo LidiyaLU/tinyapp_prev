@@ -17,9 +17,13 @@
               </div>
             </form>
           <%} else { %>
-          <form class="form-inline" action="/login" method="POST">
+          <form class="form-inline" action="/register" method="GET">
             <div class="form-group mb-2">
-              <input class="form-control" type="text" name="name" placeholder="userame" style="width: 300px; margin: 1em">
+              <button type="submit" class="btn btn-primary">register</button>
+            </div>
+          </form>  
+          <form class="form-inline" action="/login" method="GET">
+            <div class="form-group mb-2">
               <button type="submit" class="btn btn-primary">login</button>
             </div>
           </form>  

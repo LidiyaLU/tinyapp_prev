@@ -9,6 +9,7 @@ const PORT = 8080; // default port 8080
 app.set("view engine", "ejs");
 
 const bodyParser = require("body-parser");
+const e = require("express");
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookiesParser());
 
@@ -91,17 +92,30 @@ app.post("/urls/:shortURL/update", (req,res) => {
 //------------LOGIN--------------------
 
 app.post("/login", (req,res) => {
-  const username = req.body.name;
-  res.cookie("username",username);
+  const email = req.body['email'];
+  const password = req.body['password'];  
+  for(let user in users) {
+    if (email === user['email']){
+      return 
+    }
+  }
+  res.cookie("user_id",id);
   //console.log(req.cookies);
   res.redirect('/urls');
 })
+
+app.get('/login', (req,res) => {
+  //const email = req.body['email'];
+  //const password = req.body['password'];
+  //const user = req.body['email'];
+  res.render('urls_login');
+  });
 
 //------------LOGOUT------------------
 
 app.post("/logout", (req, res) => {
   res.clearCookie('username');
-  res.redirect('urls');
+  res.redirect('/urls');
 })
 
 
@@ -142,6 +156,7 @@ app.post('/register', (req,res) => {
 
   })
 
+ 
   
 
 app.listen(PORT, () => {
