@@ -51,7 +51,7 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
-app.post("/urls", (req, res) => {
+app.post("/urls/new", (req, res) => {
   //console.log(req.body);
   const shortURL = Math.random().toString(36).substr(2, 6)
   urlDatabase[shortURL] = req.body.longURL;
@@ -103,7 +103,7 @@ app.post("/login", (req,res) => {
         return res.redirect('/urls');
       } 
   }
-  return res.status(403).send("Please provide corerct email");
+  return res.status(403).send("Please provide email");
 })
 
 app.get('/login', (req,res) => {
