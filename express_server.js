@@ -38,8 +38,8 @@ app.get("/urls.json", (req, res) => {
 app.get("/urls", (req, res) => {
   const user = users[req.cookies["user_id"]];
   const templateVars = { 
-    user:user, urls: urlDatabase,
-                         username: req.cookies["username"] };/// ADD USERNAME
+    user:user, urls: urlDatabase};
+                         //email: users[req.cookies["user_id"]]['email'] };///  2)
                          
   res.render("urls_index", templateVars);
   
@@ -47,7 +47,7 @@ app.get("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   const user = users[req.cookies["user_id"]];
-  const templateVars = {user:user, username: req.cookies["username"]};
+  const templateVars = {user:user, email: user["user_id"]}; // 1)
   res.render("urls_new", templateVars);
 });
 
@@ -61,7 +61,7 @@ app.post("/urls", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const user = users[req.cookies["user_id"]];
-  const templateVars = { user: user, shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies["username"] };
+  const templateVars = { user: user, shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], email: users[req.cookies["user_id"]]['email'] }; // 3)
 
   res.render("urls_show", templateVars);
 });
@@ -83,8 +83,8 @@ app.post("/urls/:shortURL/delete", (req,res) => {
 app.post("/urls/:shortURL/update", (req,res) => {
   const newLongURL = req.body.longURL;
 
-  console.log('params' + req.params.shortURL);
-  console.log('body' + req.body.longURL);
+  //console.log('params' + req.params.shortURL);
+  //console.log('body' + req.body.longURL);
   urlDatabase[req.params.shortURL] = newLongURL;
   res.redirect('/urls');
 });
@@ -92,29 +92,32 @@ app.post("/urls/:shortURL/update", (req,res) => {
 //------------LOGIN--------------------
 
 app.post("/login", (req,res) => {
-  const email = req.body['email'];
-  const password = req.body['password'];  
+  console.log(users);
+  //console.log(currentUser);
   for(let user in users) {
-    if (email === user['email']){
-      return 
-    }
+    const currentUser = users[user];
+    console.log(currentUser);
+    if (currentUser.email === req.body['email'] && currentUser.password === req.body['password']){
+      console.log('email matching')
+        res.cookie("user_id", currentUser['id']);
+        return res.redirect('/urls');
+      } 
   }
-  res.cookie("user_id",id);
-  //console.log(req.cookies);
-  res.redirect('/urls');
+  return res.status(403).send("Please provide corerct email");
 })
 
 app.get('/login', (req,res) => {
   //const email = req.body['email'];
   //const password = req.body['password'];
   //const user = req.body['email'];
-  res.render('urls_login');
+  const templateVars = {user: users[req.cookies["user_id"]]};
+  res.render('urls_login', templateVars);
   });
 
 //------------LOGOUT------------------
 
 app.post("/logout", (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect('/urls');
 })
 
