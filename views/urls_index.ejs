@@ -29,7 +29,7 @@
         <% for(let url in urls) { %>
           <tr>
             <td><%= url %></td>
-            <td><%= urls[url] %></td>
+            <td><%= urlDetails %></td>
             <td><form method="POST" action='/urls/<%=url%>/delete'><button>DELETE</button> </form></td>>
             <td><form method = "GET" action='/urls/<%=url%>'><button>EDIT</button></td>
           </tr>

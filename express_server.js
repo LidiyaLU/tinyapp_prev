@@ -14,8 +14,8 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookiesParser());
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {longURL : "http://www.lighthouselabs.ca", userID: "userRandomID"},
+  "9sm5xK": {longURL: "http://www.google.com", userID: "user2RandomID"}
 };
 
 let users = { 
@@ -37,8 +37,9 @@ app.get("/urls.json", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const user = users[req.cookies["user_id"]];
+  
   const templateVars = { 
-    user:user, urls: urlDatabase};
+    user:user, urls: urlDatabase, urlDetails: Object.keys(urlDatabase)};
                          //email: users[req.cookies["user_id"]]['email'] };///  2)
                          
   res.render("urls_index", templateVars);
@@ -46,16 +47,23 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  const user = users[req.cookies["user_id"]];
-  const templateVars = {user:user, email: user["user_id"]}; // 1)
+  const user = users[req.cookies["user_id"]] ? users[req.cookies["user_id"]] : null ;
+  const templateVars = {user:user} // 1)
   res.render("urls_new", templateVars);
 });
 
-app.post("/urls/new", (req, res) => {
+app.post("/urls", (req, res) => {
   //console.log(req.body);
-  const shortURL = Math.random().toString(36).substr(2, 6)
-  urlDatabase[shortURL] = req.body.longURL;
-  res.redirect("/urls");
+  const user = users[req.cookies["user_id"]] ? users[req.cookies["user_id"]] : null ;
+  if (user) {
+    const shortURL = Math.random().toString(36).substr(2, 6)
+    urlDatabase[shortURL] = {longURL : req.body['longURL'], userID: "user_id"};
+    //urlDatabase[shortURL].userID = user[id];
+    res.redirect("/urls");
+  } else {
+    //res.send("Only registered users can create short url")
+    res.redirect('/login');
+  }
 }); 
 
 
