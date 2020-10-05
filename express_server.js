@@ -36,13 +36,29 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const user = users[req.cookies["user_id"]];
+  const currentUser = users[req.cookies["user_id"]] ? users[req.cookies["user_id"]] : null ;
   
-  const templateVars = { 
-    user:user, urls: urlDatabase, urlDetails: Object.keys(urlDatabase)};
-                         //email: users[req.cookies["user_id"]]['email'] };///  2)
-                         
-  res.render("urls_index", templateVars);
+  let templateVars = { 
+    user:currentUser, urls: urlDatabase}
+
+  if (currentUser) {
+
+    let newUrlDatabase = {};
+    for (let url in urlDatabase) { 
+      if(currentUser.id == urlDatabase[url]['userID']) {
+        console.log("our test", urlDatabase[url]['userID']);
+        newUrlDatabase[url]= urlDatabase[url];
+      }
+    }
+    templateVars = {user: currentUser, urls:newUrlDatabase }
+    res.render("urls_index", templateVars);
+  }
+
+  if (!currentUser) {
+      res.redirect ('/login')
+  }
+
+  //}
   
 });
 
@@ -53,15 +69,14 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  //console.log(req.body);
+  
   const user = users[req.cookies["user_id"]] ? users[req.cookies["user_id"]] : null ;
   if (user) {
     const shortURL = Math.random().toString(36).substr(2, 6)
     urlDatabase[shortURL] = {longURL : req.body['longURL'], userID: "user_id"};
-    //urlDatabase[shortURL].userID = user[id];
+    
     res.redirect("/urls");
   } else {
-    //res.send("Only registered users can create short url")
     res.redirect('/login');
   }
 }); 
@@ -69,7 +84,7 @@ app.post("/urls", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const user = users[req.cookies["user_id"]];
-  const templateVars = { user: user, shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], email: users[req.cookies["user_id"]]['email'] }; // 3)
+  const templateVars = { user: user, shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]}//, email: users[req.cookies["user_id"]][email] }; // 3)
 
   res.render("urls_show", templateVars);
 });
@@ -166,9 +181,6 @@ app.post('/register', (req,res) => {
   res.redirect('/urls');
 
   })
-
- 
-  
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
