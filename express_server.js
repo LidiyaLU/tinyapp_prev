@@ -1,6 +1,8 @@
 const express = require("express");
 const cookiesParser = require("cookie-parser");
 const cookieSession = require("cookie-session");
+const bcrypt = require("bcrypt")
+const saltRounds = 10;
 
 const app = express();
 
@@ -46,7 +48,7 @@ app.get("/urls", (req, res) => {
     let newUrlDatabase = {};
     for (let url in urlDatabase) { 
       if(currentUser.id == urlDatabase[url]['userID']) {
-        console.log("our test", urlDatabase[url]['userID']);
+        //console.log("our test", urlDatabase[url]['userID']);
         newUrlDatabase[url]= urlDatabase[url];
       }
     }
@@ -57,14 +59,12 @@ app.get("/urls", (req, res) => {
   if (!currentUser) {
       res.redirect ('/login')
   }
-
-  //}
   
 });
 
 app.get("/urls/new", (req, res) => {
   const user = users[req.cookies["user_id"]] ? users[req.cookies["user_id"]] : null ;
-  const templateVars = {user:user} // 1)
+  const templateVars = {user:user} 
   res.render("urls_new", templateVars);
 });
 
@@ -73,8 +73,8 @@ app.post("/urls", (req, res) => {
   const user = users[req.cookies["user_id"]] ? users[req.cookies["user_id"]] : null ;
   if (user) {
     const shortURL = Math.random().toString(36).substr(2, 6)
-    urlDatabase[shortURL] = {longURL : req.body['longURL'], userID: "user_id"};
-    
+    urlDatabase[shortURL] = {longURL : req.body['longURL'], userID: req.cookies["user_id"]};
+    console.log(urlDatabase)
     res.redirect("/urls");
   } else {
     res.redirect('/login');
@@ -97,19 +97,33 @@ app.get("/u/:shortURL", (req, res) => {
 
 //-------------DELETE----------
 app.post("/urls/:shortURL/delete", (req,res) => {
-  delete urlDatabase[req.params.shortURL];
-  res.redirect("/urls");
+  
+  const user = users[req.cookies["user_id"]] ? users[req.cookies["user_id"]] : null ;
+  if (user) {
+    delete urlDatabase[req.params.shortURL];
+    res.redirect("/urls"); 
+  } else {
+    res.redirect('/login');
+  }
+
 });
 
 //-------------UPDATE-----------
 
 app.post("/urls/:shortURL/update", (req,res) => {
-  const newLongURL = req.body.longURL;
+  const user = users[req.cookies["user_id"]] ? users[req.cookies["user_id"]] : null ;
 
-  //console.log('params' + req.params.shortURL);
-  //console.log('body' + req.body.longURL);
-  urlDatabase[req.params.shortURL] = newLongURL;
-  res.redirect('/urls');
+  console.log("our DB!!", urlDatabase);
+  if (user) {
+    const newLongURL = req.body.longURL;
+    urlDatabase[req.params.shortURL]['longURL'] = newLongURL;
+    console.log("link updated by", user);
+    console.log("changed url db", urlDatabase);
+    res.redirect('/urls');
+  } else {
+    res.redirect('/login');
+  }
+
 });
 
 //------------LOGIN--------------------
@@ -119,7 +133,7 @@ app.post("/login", (req,res) => {
   //console.log(currentUser);
   for(let user in users) {
     const currentUser = users[user];
-    console.log(currentUser);
+    //console.log(currentUser);
     if (currentUser.email === req.body['email'] && currentUser.password === req.body['password']){
       console.log('email matching')
         res.cookie("user_id", currentUser['id']);
@@ -149,7 +163,6 @@ app.post("/logout", (req, res) => {
 
 app.get('/register', (req,res) => {
   const templateVars = {user: users[req.cookies["user_id"]]};
-  //console.log(users);
   res.render('urls_register', templateVars);
 })
 
@@ -174,7 +187,7 @@ app.post('/register', (req,res) => {
 
   users[id] = {id: id,
                 email: email,
-                password: password};
+                password: bcrypt.hashSync(password, saltRounds)};
 
   res.cookie("user_id", id);
   
