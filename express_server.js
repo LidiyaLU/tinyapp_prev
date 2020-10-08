@@ -31,7 +31,8 @@ let users = {
     password: '$2b$10$jC2reBsO2/sVGvPGO9Y2v.e9vst.alw71JO2WuEUx4Z1Sgc59X8q2'
   }
 };
-
+// old password: userRandomID - purple-monkey-dinosaur
+//               user2RandomID - dishwasher-funk
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
