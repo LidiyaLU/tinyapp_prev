@@ -2,9 +2,7 @@ const express = require("express");
 const cookiesParser = require("cookie-parser");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
-
 const app = express();
-
 const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs");
@@ -134,9 +132,9 @@ app.post("/urls/:shortURL/update", (req,res) => {
 //------------LOGIN--------------------
 
 app.post("/login", (req,res) => {
+  
   for (let user in users) {
     const currentUser = users[user];
-
     if (currentUser.email === req.body['email'] && bcrypt.compareSync(req.body['password'], currentUser['password'])) {
       res.cookie("user_id", currentUser['id']);
       return res.redirect('/urls');
